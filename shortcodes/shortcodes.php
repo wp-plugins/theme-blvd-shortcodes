@@ -203,7 +203,7 @@ function themeblvd_shortcode_button( $atts, $content = null ) {
         'link' 			=> 'http://www.google.com',
         'color' 		=> 'default',
         'target' 		=> '_self',
-        'size' 			=> 'small',
+        'size' 			=> '',
         'class' 		=> '',
         'title' 		=> '',
         'icon_before' 	=> '',
@@ -346,6 +346,7 @@ function themeblvd_shortcode_popup( $atts, $content = null ) {
     	'text' 			=> 'Link Text', // Text for link or button leading to popup
 		'title' 		=> '', 			// Title for anchor, will default to "text" option
 		'color' 		=> '', 			// Color of button, only applies if button style is selected
+		'size'			=> '',			// Size of button, 
 		'icon_before'	=> '', 			// Icon before button or link's text
 		'icon_after' 	=> '', 			// Icon after button or link's text
 		'header' 		=> '', 			// Header text for popup
@@ -406,14 +407,25 @@ function themeblvd_shortcode_popup( $atts, $content = null ) {
  */
 
 function themeblvd_shortcode_icon( $atts, $content = null ) {
-	$output = '';
+	
 	$default = array(
         'image' => 'accepted',
-        'align' => 'left' // left, right, center, none
+        'align' => 'left', // left, right, center, none
+        'width'	=> '45'
     );
     extract( shortcode_atts( $default, $atts ) );
+    
+    // Icon image URL
+    $image_url = get_template_directory_uri().'/framework/frontend/assets/images/shortcodes/icons/'.$image.'.png';
+    if( file_exists( get_stylesheet_directory().'/icons/'.$image.'.png' ) )
+    	$image_url = get_stylesheet_directory_uri().'/icons/'.$image.'.png';
+    
+    // Alignment
     $align != 'none' ? $align = ' class="align'.$align.'"' : $align = null;
-    $output = '<img src="'.get_template_directory_uri().'/framework/frontend/assets/images/shortcodes/icons/'.$image.'.png"'.$align.' />';
+    
+    // Output
+    $output = '<img src="'.$image_url.'" width="'.$width.'"'.$align.' />';
+	
 	return $output;
 }
 
@@ -633,7 +645,7 @@ function themeblvd_shortcode_accordion( $atts, $content = null ) {
  */
 
 function themeblvd_shortcode_toggle( $atts, $content = null ) {		
-	if( isset( $atts[0] ) ) $last = ' accordion-group-last';
+	$last = isset( $atts[0] ) ? $last = ' accordion-group-last' : null;
 	$default = array(
         'title' => ''
     );
@@ -677,7 +689,7 @@ function themeblvd_shortcode_post_grid_slider( $atts ) {
         'columns' 		=> 3,			// columns: Number of posts per row
         'rows' 			=> 3,			// rows: Number of rows per slide
         'numberposts' 	=> -1,			// numberposts: Total number of posts, -1 for all posts
-        'orderby' 		=> 'post_date',	// orderby: post_date, title, comment_count, rand
+        'orderby' 		=> 'date',		// orderby: date, title, comment_count, rand
         'order' 		=> 'DESC',		// order: DESC, ASC
         'offset' 		=> 0,			// offset: Number of posts to offset off the start, defaults to 0
         'crop'			=> ''			// crop: Can manually enter a featured image crop size
@@ -765,7 +777,7 @@ function themeblvd_shortcode_post_list_slider( $atts ) {
         'post_content' 		=> 'default',	// content: Show excerpts or full content - default, content, excerpt
         'posts_per_slide' 	=> 3,			// posts_per_slide: Number of posts per slide.
         'numberposts' 		=> -1,			// numberposts: Total number of posts, -1 for all posts
-        'orderby' 			=> 'post_date',	// orderby: post_date, title, comment_count, rand
+        'orderby' 			=> 'date',		// orderby: date, title, comment_count, rand
         'order' 			=> 'DESC',		// order: DESC, ASC
         'offset' 			=> 0			// offset: Number of posts to offset off the start, defaults to 0
     ); 
@@ -849,7 +861,7 @@ function themeblvd_shortcode_post_grid( $atts ) {
         'categories' 	=> '',					// categories: Categories to include, category slugs separated by commas, or blank for all categories
         'columns' 		=> 3,					// columns: Number of posts per row
         'rows' 			=> 3,					// rows: Number of rows per slide
-        'orderby' 		=> 'post_date',			// orderby: post_date, title, comment_count, rand
+        'orderby' 		=> 'date',				// orderby: date, title, comment_count, rand
         'order' 		=> 'DESC',				// order: DESC, ASC
         'offset' 		=> 0,					// offset: Number of posts to offset off the start, defaults to 0
         'query' 		=> '',					// custom query string
@@ -922,7 +934,7 @@ function themeblvd_shortcode_post_list( $atts ) {
 		'thumbs' 		=> 'default',			// thumbs: Size of post thumbnails - default, small, full, hide
 		'post_content' 	=> 'default',			// content: Show excerpts or full content - default, content, excerpt
 		'numberposts' 	=> 3,					// numberposts: Total number of posts, -1 for all posts            
-        'orderby' 		=> 'post_date',			// orderby: post_date, title, comment_count, rand
+        'orderby' 		=> 'date',				// orderby: date, title, comment_count, rand
         'order' 		=> 'DESC',				// order: DESC, ASC
         'offset' 		=> 0,					// offset: Number of posts to offset off the start, defaults to 0
         'link'			=> 0,					// link: Show link after posts, true or false
@@ -994,7 +1006,7 @@ function themeblvd_shortcode_mini_post_grid( $atts ) {
 	$default = array(
 	    'categories' 	=> '',			// categories: Categories to include, category slugs separated by commas, or blank for all categories
 		'numberposts' 	=> 4,			// numberposts: Total number of posts, -1 for all posts         
-	    'orderby' 		=> 'post_date',	// orderby: post_date, title, comment_count, rand
+	    'orderby' 		=> 'date',		// orderby: date, title, comment_count, rand
 	    'order' 		=> 'DESC',		// order: DESC, ASC
 	    'offset' 		=> 0,			// offset: Number of posts to offset off the start, defaults to 0
 	    'query' 		=> '',			// custom query string
@@ -1029,14 +1041,14 @@ function themeblvd_shortcode_mini_post_grid( $atts ) {
 function themeblvd_shortcode_mini_post_list( $atts ) {
 	// Default shortcode atts
 	$default = array(
-	    'categories' => '',					// categories: Categories to include, category slugs separated by commas, or blank for all categories
-		'numberposts' => 4,					// numberposts: Total number of posts, -1 for all posts         
-	    'orderby' => 'post_date',			// orderby: post_date, title, comment_count, rand
-	    'order' => 'DESC',					// order: DESC, ASC
-	    'offset' => 0,						// offset: Number of posts to offset off the start, defaults to 0
-	    'query' => '',						// custom query string
-	    'thumb' => 'smaller',				// thumbnail size - small, smaller, smallest, or hide
-	    'meta' => 'show'					// show meta or not - show or hide
+	    'categories' 	=> '',			// categories: Categories to include, category slugs separated by commas, or blank for all categories
+		'numberposts' 	=> 4,			// numberposts: Total number of posts, -1 for all posts         
+	    'orderby' 		=> 'date',		// orderby: date, title, comment_count, rand
+	    'order' 		=> 'DESC',		// order: DESC, ASC
+	    'offset' 		=> 0,			// offset: Number of posts to offset off the start, defaults to 0
+	    'query' 		=> '',			// custom query string
+	    'thumb' 		=> 'smaller',	// thumbnail size - small, smaller, smallest, or hide
+	    'meta' 			=> 'show'		// show meta or not - show or hide
 	); 
 	extract( shortcode_atts( $default, $atts ) );
 	// Build query
