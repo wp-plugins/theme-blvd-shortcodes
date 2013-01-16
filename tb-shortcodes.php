@@ -3,7 +3,7 @@
 Plugin Name: Theme Blvd Shortcodes
 Plugin URI: 
 Description: This plugin works in conjuction with the Theme Blvd framework to create shortcodes for many of the framework's internal elements.
-Version: 1.0.3
+Version: 1.0.4
 Author: Jason Bobich
 Author URI: http://jasonbobich.com
 License: GPL2
@@ -25,7 +25,7 @@ License: GPL2
     http://www.gnu.org/licenses/gpl-2.0.html
 
 */
-define( 'TB_SHORTCODES_PLUGIN_VERSION', '1.0.3' );
+define( 'TB_SHORTCODES_PLUGIN_VERSION', '1.0.4' );
 define( 'TB_SHORTCODES_PLUGIN_DIR', dirname( __FILE__ ) ); 
 define( 'TB_SHORTCODES_PLUGIN_URI', plugins_url( '' , __FILE__ ) );
 
@@ -47,10 +47,12 @@ function themeblvd_shortcodes_init() {
 	}
 	
 	if( is_admin() ) {
-	
-		// Add shortcode generator
-		include_once( TB_SHORTCODES_PLUGIN_DIR . '/admin/generator/class-tb-shortcode-generator.php' );
-		$_themeblvd_shortcode_generator = new Theme_Blvd_Shortcode_Generator();
+		
+		// Add shortcode generator -- Can be disabled from WP > Settings > Writing
+		if( get_option( 'themeblvd_shortcode_generator' ) != 'no' ) {
+			include_once( TB_SHORTCODES_PLUGIN_DIR . '/admin/generator/class-tb-shortcode-generator.php' );
+			$_themeblvd_shortcode_generator = new Theme_Blvd_Shortcode_Generator();
+		}
 		
 		// Add shortcode options - Currently this consists of one option 
 		// that allows the [raw] shortcode to be disabled added to 
