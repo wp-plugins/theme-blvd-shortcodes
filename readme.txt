@@ -2,7 +2,7 @@
 Author URI: http://www.jasonbobich.com
 Contributors: themeblvd
 Tags: shortcodes, bootstrap, Theme Blvd, themeblvd, Jason Bobich
-Stable Tag: 1.0.4
+Stable Tag: 1.0.5
 
 This plugin works in conjuction with the Theme Blvd framework to create shortcodes for many of the framework's internal elements.
 
@@ -83,10 +83,20 @@ Any content wrapped in the `[raw]` shortcode will allow you to escape any automa
 
 == Changelog ==
 
+= 1.0.5 =
+
+* Added custom "query" parameter for post list/grid slider shortcodes.
+* Added feature to start toggle as open. -- `[toggle open="true"]`
+* Fixed wpautop happenning before do_shortcode on "themeblvd_the_content".
+* Accounted for framework now adding more filters to "themeblvd_the_content" when adding in `[raw]` shortcode.
+
 = 1.0.4 =
 
 * Added option at WP > Settings > Writing to turn off Shortcode generator from Visual Editor.
 * Added CSS classes to `[icon]` shortcode for any potential custom styling.
+* Now using "cat" and "category_name" params for `[mini_post_list]`, `[mini_post_grid]`, `[post_list]`, `[post_grid]`, `[post_list_slider]`, and `[post_grid_slider]`.
+* Added "tag" parameter for `[mini_post_list]`, `[mini_post_grid]`, `[post_list]`, `[post_grid]`, `[post_list_slider]`, and `[post_grid_slider]`.
+* Updated generator options for modified shortcodes.
 
 = 1.0.3 =
 

@@ -200,7 +200,7 @@ function themeblvd_shortcode_icon_list( $atts, $content = null ) {
 function themeblvd_shortcode_button( $atts, $content = null ) {
 	$output = '';
 	$default = array(
-        'link' 			=> 'http://www.google.com',
+        'link' 			=> '',
         'color' 		=> 'default',
         'target' 		=> '_self',
         'size' 			=> '',
@@ -442,7 +442,7 @@ function themeblvd_shortcode_icon( $atts, $content = null ) {
 function themeblvd_shortcode_icon_link( $atts, $content = null ) {	    
     $default = array(
         'icon' 		=> '', // alert, approved, camera, cart, doc, download, media, note, notice, quote, warning
-        'link' 		=> 'http://www.google.com',
+        'link' 		=> '',
         'target' 	=> '_self',
         'class' 	=> '',
         'title' 	=> ''
@@ -647,17 +647,25 @@ function themeblvd_shortcode_accordion( $atts, $content = null ) {
 function themeblvd_shortcode_toggle( $atts, $content = null ) {		
 	$last = isset( $atts[0] ) ? $last = ' accordion-group-last' : null;
 	$default = array(
-        'title' => ''
+        'title' => '',
+        'open'  => 'false'
     );
 	extract( shortcode_atts( $default, $atts ) );
+    // Is toggle open?
+    $classes = 'accordion-body collapse';
+    $icon = 'icon-plus-sign';
+    if( $open == 'true' ) {
+        $classes .= ' in';
+        $icon = 'icon-minus-sign';
+    }
 	// Individual toggle ID (NOT the Accordion ID)
 	$toggle_id = uniqid( 'toggle_'.rand() );
 	// Start output
 	$output  = '<div class="accordion-group'.$last.'">';
 	$output .= '<div class="accordion-heading">';               
-	$output .= '<a class="accordion-toggle" data-toggle="collapse" href="#'.$toggle_id.'"><i class="icon-plus-sign switch-me"></i> '.$title.'</a>';
+	$output .= '<a class="accordion-toggle" data-toggle="collapse" href="#'.$toggle_id.'"><i class="'.$icon.' switch-me"></i> '.$title.'</a>';
 	$output .= '</div><!-- .accordion-heading (end) -->';
-	$output .= '<div id="'.$toggle_id.'" class="accordion-body collapse">';
+	$output .= '<div id="'.$toggle_id.'" class="'.$classes.'">';
 	$output .= '<div class="accordion-inner">';
 	$output .= apply_filters( 'themeblvd_the_content', $content );
 	$output .= '</div><!-- .accordion-inner (end) -->';
@@ -685,15 +693,19 @@ function themeblvd_shortcode_post_grid_slider( $atts ) {
         'nav_standard' 	=> 1, 			// nav_standard: Show standard nav dots to control slider - true or false
         'nav_arrows' 	=> 1, 			// nav_arrows: Show directional arrows to control slider - true or false
         'pause_play' 	=> 1, 			// pause_play: Show pause/play button - true or false
-        'categories' 	=> '',			// categories: Categories to include, category slugs separated by commas, or blank for all categories
+        'categories'    => '',          // @deprecated -- Category slug(s) to include/exclude
+        'cat'           => '',          // cat: Category ID(s) to include/exclude
+        'category_name' => '',          // category_name: Category slug(s) to include/exclude
+        'tag'           => '',          // tag: Tag(s) to include/exclude
         'columns' 		=> 3,			// columns: Number of posts per row
         'rows' 			=> 3,			// rows: Number of rows per slide
         'numberposts' 	=> -1,			// numberposts: Total number of posts, -1 for all posts
         'orderby' 		=> 'date',		// orderby: date, title, comment_count, rand
         'order' 		=> 'DESC',		// order: DESC, ASC
         'offset' 		=> 0,			// offset: Number of posts to offset off the start, defaults to 0
+        'query'         => '',          // query: custom query string
         'crop'			=> ''			// crop: Can manually enter a featured image crop size
-    ); 
+    );
     extract( shortcode_atts( $default, $atts ) );
     // Generate unique ID
 	$id = uniqid( 'grid_'.rand() );
@@ -701,13 +713,13 @@ function themeblvd_shortcode_post_grid_slider( $atts ) {
     $options = array(
         'fx' 			=> $fx,
         'timeout' 		=> $timeout,
-        'categories' 	=> array('all' => 0),
         'columns' 		=> $columns,
         'rows' 			=> $rows,
         'numberposts' 	=> $numberposts,
         'orderby' 		=> $orderby,
         'order' 		=> $order,
         'offset' 		=> $offset,
+        'query'         => $query,
         'crop' 			=> $crop
     );
     
@@ -733,15 +745,17 @@ function themeblvd_shortcode_post_grid_slider( $atts ) {
     else
     	$options['pause_play'] = $default['pause_play'];
     
-    // Build categories array
-    if( $categories ) {
-    	$formatted_categories = explode( ',', $categories );
-    	foreach( $formatted_categories as $category ) {
-    		$options['categories'][$category] = 1;
-    	}
-    } else {
-    	$options['categories']['all'] = 1;
-    }
+    // Categories
+    if( $cat )
+        $options['cat'] = $cat;
+    elseif( $category_name )
+        $options['category_name'] = $category_name;
+    elseif( $categories )
+        $options['category_name'] = $categories; // @deprecated
+
+    // Tags
+    if( $tag )
+        $options['tag'] = $tag;
     
 	// Output
 	ob_start();
@@ -758,7 +772,7 @@ function themeblvd_shortcode_post_grid_slider( $atts ) {
 }
 
 /**
- * Post Slider
+ * Post List Slider
  *
  * @since 1.0.0
  *
@@ -772,14 +786,18 @@ function themeblvd_shortcode_post_list_slider( $atts ) {
         'nav_standard' 		=> 1, 			// nav_standard: Show standard nav dots to control slider - true or false
         'nav_arrows' 		=> 1, 			// nav_arrows: Show directional arrows to control slider - true or false
         'pause_play' 		=> 1, 			// pause_play: Show pause/play button - true or false
-        'categories' 		=> '',			// categories: Categories to include, category slugs separated by commas, or blank for all categories
+        'categories'        => '',          // @deprecated -- Category slug(s) to include/exclude
+        'cat'               => '',          // cat: Category ID(s) to include/exclude
+        'category_name'     => '',          // category_name: Category slug(s) to include/exclude
+        'tag'               => '',          // tag: Tag(s) to include/exclude
         'thumbs' 			=> 'default',	// thumbs: Size of post thumbnails - default, small, full, hide
         'post_content' 		=> 'default',	// content: Show excerpts or full content - default, content, excerpt
-        'posts_per_slide' 	=> 3,			// posts_per_slide: Number of posts per slide.
+        'posts_per_slide'   => 3,			// posts_per_slide: Number of posts per slide.
         'numberposts' 		=> -1,			// numberposts: Total number of posts, -1 for all posts
         'orderby' 			=> 'date',		// orderby: date, title, comment_count, rand
         'order' 			=> 'DESC',		// order: DESC, ASC
-        'offset' 			=> 0			// offset: Number of posts to offset off the start, defaults to 0
+        'offset' 			=> 0,			// offset: Number of posts to offset off the start, defaults to 0
+        'query'             => ''           // query: custom query string
     ); 
     extract( shortcode_atts( $default, $atts ) );	    
     // Generate unique ID
@@ -788,14 +806,14 @@ function themeblvd_shortcode_post_list_slider( $atts ) {
     $options = array(
         'fx' 				=> $fx,
         'timeout' 			=> $timeout,
-        'categories' 		=> array('all' => 0),
         'thumbs' 			=> $thumbs,	
         'content' 			=> $post_content,
         'posts_per_slide' 	=> $posts_per_slide,
         'numberposts' 		=> $numberposts,
         'orderby' 			=> $orderby,
         'order' 			=> $order,
-        'offset' 			=> $offset
+        'offset' 			=> $offset,
+        'query'             => $query,
     );
     
     // Add in the booleans
@@ -820,15 +838,17 @@ function themeblvd_shortcode_post_list_slider( $atts ) {
     else
     	$options['pause_play'] = $default['pause_play'];
     
-    // Build categories array
-    if( $categories ) {
-    	$formatted_categories = explode( ',', $categories );
-    	foreach( $formatted_categories as $category ) {
-    		$options['categories'][$category] = 1;
-    	}
-    } else {
-    	$options['categories']['all'] = 1;
-    }
+    // Categories
+    if( $cat )
+        $options['cat'] = $cat;
+    elseif( $category_name )
+        $options['category_name'] = $category_name;
+    elseif( $categories )
+        $options['category_name'] = $categories; // @deprecated
+    
+    // Tags
+    if( $tag )
+        $options['tag'] = $tag;
     
 	// Output
 	ob_start();
@@ -858,7 +878,9 @@ function themeblvd_shortcode_post_list_slider( $atts ) {
 
 function themeblvd_shortcode_post_grid( $atts ) {
 	$default = array(
-        'categories' 	=> '',					// categories: Categories to include, category slugs separated by commas, or blank for all categories
+        'categories'    => '',                  // @deprecated -- Category slug(s) to include/exclude
+        'cat'           => '',                  // cat: Category ID(s) to include/exclude
+        'category_name' => '',                  // category_name: Category slug(s) to include/exclude
         'columns' 		=> 3,					// columns: Number of posts per row
         'rows' 			=> 3,					// rows: Number of rows per slide
         'orderby' 		=> 'date',				// orderby: date, title, comment_count, rand
@@ -875,7 +897,6 @@ function themeblvd_shortcode_post_grid( $atts ) {
     
     // Build $options array compatible to element's function
     $options = array(
-        'categories' 	=> array('all' => 0),
         'columns' 		=> $columns,
         'rows' 			=> $rows,
         'orderby' 		=> $orderby,
@@ -888,23 +909,21 @@ function themeblvd_shortcode_post_grid( $atts ) {
         'link_target' 	=> $link_target
     );
     
+    // Categories
+    if( $cat )
+        $options['cat'] = $cat;
+    elseif( $category_name )
+        $options['category_name'] = $category_name;
+    elseif( $categories )
+        $options['category_name'] = $categories; // @deprecated
+    
     // Add in the booleans
     if( $link === 'true' )
-    	$options['link'] = 1;
+        $options['link'] = 1;
     else if( $link === 'false' )
-    	$options['link'] = 0;
+        $options['link'] = 0;
     else
-    	$options['link'] = $default['link'];
-    
-    // Build categories array
-    if( $categories ) {
-    	$formatted_categories = explode( ',', $categories );
-    	foreach( $formatted_categories as $category ) {
-    		$options['categories'][$category] = 1;
-    	}
-    } else {
-    	$options['categories']['all'] = 1;
-    }
+        $options['link'] = $default['link'];
     
 	// Output
 	ob_start();
@@ -930,8 +949,10 @@ function themeblvd_shortcode_post_grid( $atts ) {
 
 function themeblvd_shortcode_post_list( $atts ) {
 	$default = array(
-        'categories' 	=> '',					// categories: Categories to include, category slugs separated by commas, or blank for all categories
-		'thumbs' 		=> 'default',			// thumbs: Size of post thumbnails - default, small, full, hide
+        'categories' 	=> '',					// @deprecated -- Category slug(s) to include/exclude
+		'cat'           => '',                  // cat: Category ID(s) to include/exclude
+        'category_name' => '',                  // category_name: Category slug(s) to include/exclude
+        'thumbs' 		=> 'default',			// thumbs: Size of post thumbnails - default, small, full, hide
 		'post_content' 	=> 'default',			// content: Show excerpts or full content - default, content, excerpt
 		'numberposts' 	=> 3,					// numberposts: Total number of posts, -1 for all posts            
         'orderby' 		=> 'date',				// orderby: date, title, comment_count, rand
@@ -947,7 +968,6 @@ function themeblvd_shortcode_post_list( $atts ) {
     
     // Build $options array compatible to element's function
     $options = array(
-        'categories' 	=> array('all' => 0),
         'thumbs' 		=> $thumbs,
         'content' 		=> $post_content,
         'numberposts' 	=> $numberposts,
@@ -959,7 +979,15 @@ function themeblvd_shortcode_post_list( $atts ) {
         'link_url' 		=> $link_url,
         'link_target' 	=> $link_target
     );
-    
+     
+    // Categories
+    if( $cat )
+        $options['cat'] = $cat;
+    elseif( $category_name )
+        $options['category_name'] = $category_name;
+    elseif( $categories )
+        $options['category_name'] = $categories; // @deprecated
+
     // Add in the booleans
     if( $link === 'true' )
     	$options['link'] = 1;
@@ -967,16 +995,6 @@ function themeblvd_shortcode_post_list( $atts ) {
     	$options['link'] = 0;
     else
     	$options['link'] = $default['link'];
-    
-    // Build categories array
-    if( $categories ) {
-    	$formatted_categories = explode( ',', $categories );
-    	foreach( $formatted_categories as $category ) {
-    		$options['categories'][$category] = 1;
-    	}
-    } else {
-    	$options['categories']['all'] = 1;
-    }
     
 	// Output
 	ob_start();
@@ -1004,8 +1022,11 @@ function themeblvd_shortcode_post_list( $atts ) {
 function themeblvd_shortcode_mini_post_grid( $atts ) {
 	// Default shortcode atts
 	$default = array(
-	    'categories' 	=> '',			// categories: Categories to include, category slugs separated by commas, or blank for all categories
-		'numberposts' 	=> 4,			// numberposts: Total number of posts, -1 for all posts         
+	    'categories' 	=> '',			// @deprecated -- Category slug(s) to include/exclude 
+        'cat'           => '',          // cat: Category ID(s) to include/exclude
+        'category_name' => '',          // category_name: Category slug(s) to include/exclude
+		'tag'           => '',          // tag: Tag(s) to include/exclude
+        'numberposts' 	=> 4,			// numberposts: Total number of posts, -1 for all posts         
 	    'orderby' 		=> 'date',		// orderby: date, title, comment_count, rand
 	    'order' 		=> 'DESC',		// order: DESC, ASC
 	    'offset' 		=> 0,			// offset: Number of posts to offset off the start, defaults to 0
@@ -1017,11 +1038,21 @@ function themeblvd_shortcode_mini_post_grid( $atts ) {
 	extract( shortcode_atts( $default, $atts ) );
 	// Build query
 	if( ! $query ) {
-		$query  = 'category_name='.$categories;
-		$query .= '&numberposts='.$numberposts;
-		$query .= '&orderby='.$orderby;
-		$query .= '&order='.$order;
-		$query .= '&offset='.$offset;
+        // Categories
+        if( $categories ) // @deprecated
+            $query .= 'category_name='.$categories.'&';
+        if( $cat )
+            $query .= 'cat='.$cat.'&';
+        if( $category_name )
+            $query .= 'category_name='.$category_name.'&';
+        // Tags
+        if( $tag )
+            $query .= 'tag='.$tag.'&';
+        // Continue query
+		$query .= 'numberposts='.$numberposts.'&';
+		$query .= 'orderby='.$orderby.'&';
+		$query .= 'order='.$order.'&';
+		$query .= 'offset='.$offset;
 	}
 	// Output
 	$output = themeblvd_get_mini_post_grid( $query, $align, $thumb, $gallery );
@@ -1041,8 +1072,11 @@ function themeblvd_shortcode_mini_post_grid( $atts ) {
 function themeblvd_shortcode_mini_post_list( $atts ) {
 	// Default shortcode atts
 	$default = array(
-	    'categories' 	=> '',			// categories: Categories to include, category slugs separated by commas, or blank for all categories
-		'numberposts' 	=> 4,			// numberposts: Total number of posts, -1 for all posts         
+	    'categories'    => '',          // @deprecated -- Category slug(s) to include/exclude 
+        'cat'           => '',          // cat: Category ID(s) to include/exclude
+        'category_name' => '',          // category_name: Category slug(s) to include/exclude
+		'tag'           => '',          // tag: Tag(s) to include/exclude
+        'numberposts' 	=> 4,			// numberposts: Total number of posts, -1 for all posts         
 	    'orderby' 		=> 'date',		// orderby: date, title, comment_count, rand
 	    'order' 		=> 'DESC',		// order: DESC, ASC
 	    'offset' 		=> 0,			// offset: Number of posts to offset off the start, defaults to 0
@@ -1051,14 +1085,24 @@ function themeblvd_shortcode_mini_post_list( $atts ) {
 	    'meta' 			=> 'show'		// show meta or not - show or hide
 	); 
 	extract( shortcode_atts( $default, $atts ) );
-	// Build query
-	if( ! $query ) {
-		$query  = 'category_name='.$categories;
-		$query .= '&numberposts='.$numberposts;
-		$query .= '&orderby='.$orderby;
-		$query .= '&order='.$order;
-		$query .= '&offset='.$offset;
-	}
+    // Build query
+    if( ! $query ) {
+        // Categories
+        if( $categories ) // @deprecated
+            $query .= 'category_name='.$categories.'&';
+        if( $cat )
+            $query .= 'cat='.$cat.'&';
+        if( $category_name )
+            $query .= 'category_name='.$category_name.'&';
+        // Tags
+        if( $tag )
+            $query .= 'tag='.$tag.'&';
+        // Continue query
+        $query .= 'numberposts='.$numberposts.'&';
+        $query .= 'orderby='.$orderby.'&';
+        $query .= 'order='.$order.'&';
+        $query .= 'offset='.$offset;
+    }
 	// Format thumbnail size
 	if( $thumb == 'hide' ) 
 		$thumb = false;
