@@ -60,11 +60,12 @@
  */
 
 function themeblvd_shortcode_column( $atts, $content = null, $tag = '' ) {
-	// Determine if column is last in row
+    // Determine if column is last in row
 	$last = '';
-	if ( isset( $atts[0] ) && trim( $atts[0] ) == 'last')
+	if( isset( $atts[0] ) && trim( $atts[0] ) == 'last')
 		$last = ' last';
-	// Determine width of column
+	
+    // Determine width of column
 	$class = 'column ';
 	if( 'one_sixth' == $tag || 'one-sixth' == $tag )
 		$class .= 'grid_2';
@@ -90,9 +91,14 @@ function themeblvd_shortcode_column( $atts, $content = null, $tag = '' ) {
 		$class .= 'grid_tenth_3';
 	else if( 'seven_tenth' == $tag || 'seven-tenth' == $tag )
 		$class .= 'grid_tenth_7';
-	// Return column
+	
+    // Force wpautop in shortcode? (not relevant if columns not wrapped in [raw])
+    if( isset( $atts['wpautop'] ) && trim( $atts['wpautop'] ) == 'true')
+        $content = wpautop( $content );
+
+    // Return column
 	$content = '<div class="'.$class.$last.'">'.$content.'</div><!-- .column (end) -->';
-	return do_shortcode( $content );
+    return do_shortcode( $content );
 }
 
 /**
@@ -881,6 +887,7 @@ function themeblvd_shortcode_post_grid( $atts ) {
         'categories'    => '',                  // @deprecated -- Category slug(s) to include/exclude
         'cat'           => '',                  // cat: Category ID(s) to include/exclude
         'category_name' => '',                  // category_name: Category slug(s) to include/exclude
+        'tag'           => '',                  // tag: Tag(s) to include/exclude
         'columns' 		=> 3,					// columns: Number of posts per row
         'rows' 			=> 3,					// rows: Number of rows per slide
         'orderby' 		=> 'date',				// orderby: date, title, comment_count, rand
@@ -899,6 +906,7 @@ function themeblvd_shortcode_post_grid( $atts ) {
     $options = array(
         'columns' 		=> $columns,
         'rows' 			=> $rows,
+        'tag'           => $tag,
         'orderby' 		=> $orderby,
         'order' 		=> $order,
         'offset' 		=> $offset,
@@ -952,6 +960,7 @@ function themeblvd_shortcode_post_list( $atts ) {
         'categories' 	=> '',					// @deprecated -- Category slug(s) to include/exclude
 		'cat'           => '',                  // cat: Category ID(s) to include/exclude
         'category_name' => '',                  // category_name: Category slug(s) to include/exclude
+        'tag'           => '',                  // tag: Tag(s) to include/exclude
         'thumbs' 		=> 'default',			// thumbs: Size of post thumbnails - default, small, full, hide
 		'post_content' 	=> 'default',			// content: Show excerpts or full content - default, content, excerpt
 		'numberposts' 	=> 3,					// numberposts: Total number of posts, -1 for all posts            
@@ -970,6 +979,7 @@ function themeblvd_shortcode_post_list( $atts ) {
     $options = array(
         'thumbs' 		=> $thumbs,
         'content' 		=> $post_content,
+        'tag'           => $tag,
         'numberposts' 	=> $numberposts,
         'orderby' 		=> $orderby,
         'order' 		=> $order,
