@@ -25,6 +25,7 @@
  *		- popup				=> @since 1.0.0
  *      - lightbox          => @since 1.1.0
  *      - lightbox_gallery  => @since 1.1.0
+ *      - blockquote        => @since 1.2.0
  * (3) Inline Elements
  *		- icon				=> @since 1.0.0
  *		- icon_link 		=> @since 1.0.0
@@ -215,12 +216,18 @@ function themeblvd_shortcode_icon_list( $atts, $content = null ) {
 
     // Color
     $color_css = '';
-    if( $color )
+    if( $color ) {
     	$color_css = ' style="color:'.$color.';"';
+    }
 
     // Add in fontawesome icon
     $content = str_replace('<ul>', '<ul class="tb-icon-list">', $content );
-    $content = str_replace('<li>', '<li><i class="icon-'.$icon.'"'.$color_css.'></i> ', $content );
+
+    if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '>=' ) ) {
+        $content = str_replace('<li>', '<li><i class="fa fa-'.$icon.'"'.$color_css.'></i> ', $content );
+    } else {
+        $content = str_replace('<li>', '<li><i class="icon-'.$icon.'"'.$color_css.'></i> ', $content );
+    }
 
     // Output
     $output = do_shortcode($content);
@@ -248,11 +255,26 @@ function themeblvd_shortcode_button( $atts, $content = null ) {
         'class' 		=> '',
         'title' 		=> '',
         'icon_before' 	=> '',
-        'icon_after' 	=> ''
+        'icon_after' 	=> '',
+        'block'         => 'false'
     );
     extract( shortcode_atts( $default, $atts ) );
 
-    $output = themeblvd_button( $content, $link, $color, $target, $size, $class, $title, $icon_before, $icon_after );
+    if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '>=' ) ) {
+
+        if ( $block == 'true' ) {
+            $block = true;
+        } else {
+            $block = false;
+        }
+
+        $output = themeblvd_button( $content, $link, $color, $target, $size, $class, $title, $icon_before, $icon_after, '', $block );
+
+    } else {
+
+        $output = themeblvd_button( $content, $link, $color, $target, $size, $class, $title, $icon_before, $icon_after );
+
+    }
 
     return $output;
 }
@@ -278,15 +300,15 @@ function themeblvd_shortcode_box( $atts, $content = null ) {
     extract( shortcode_atts( $default, $atts ) );
 
     // Classes
-    $classes = 'info-box info-box-'.$style;
+    $classes = sprintf( 'info-box info-box-%s', $style );
 
     // Add icon
     if( $icon ) {
     	$classes .= ' info-box-has-icon';
-    	$content = '<i class="icon icon-'.$icon.'"></i>'.$content;
+    	$content = sprintf( '<i class="icon fa fa-%s"></i>%s', $icon, $content );
     }
 
-    $output = '<div class="'.$classes.'">'.apply_filters('themeblvd_the_content', $content).'</div>';
+    $output = sprintf( '<div class="%s">%s</div>', $classes, apply_filters( 'themeblvd_the_content', $content ) );
 
     return $output;
 }
@@ -303,24 +325,34 @@ function themeblvd_shortcode_box( $atts, $content = null ) {
 function themeblvd_shortcode_alert( $atts, $content = null ) {
 
     $default = array(
-        'style' => 'blue', // info, success, danger, 'message'
+        'style' => 'blue', // info, success, danger, warning
         'close' => 'false' // true, false
     );
     extract( shortcode_atts( $default, $atts ) );
 
+    // In Bootstrap 3, 'message' was changed to 'warning'
+    if ( 'message' == $style ) {
+        $style = 'warning';
+    }
+
     // CSS classes
     $classes = 'alert';
-    if( in_array( $style, array( 'info', 'success', 'danger', 'message' ) ) ) // Twitter Bootstrap options
-    	$classes .= ' alert-'.$style;
-    if( $close == 'true' )
+
+    if( in_array( $style, array( 'info', 'success', 'danger', 'warning' ) ) ) { // Twitter Bootstrap options
+    	$classes .= sprintf( ' alert-%s', $style );
+    }
+
+    if( $close == 'true' ) {
     	$classes .= ' fade in';
+    }
 
     // Start output
-    $output = '<div class="'.$classes.'">';
+    $output = sprintf( '<div class="%s">', $classes );
 
     // Add a close button?
-    if( $close == 'true' )
+    if( $close == 'true' ) {
     	$output .= '<button type="button" class="close" data-dismiss="alert">×</button>';
+    }
 
     // Finish output
     $output .= $content.'</div><!-- .alert (end) -->';
@@ -364,22 +396,92 @@ function themeblvd_shortcode_progress_bar( $atts ) {
     );
     extract( shortcode_atts( $default, $atts ) );
 
-    $classes = 'progress';
+    $wrap_classes = '';
+
+    // Wrap classes for Bootstrap 3+
+    if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '>=' ) ) {
+        $wrap_classes = 'progress';
+    }
+
+    // Start classes
+    $classes = '';
+
+    if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '>=' ) ) {
+
+        // Bootstrap 3+
+        $classes = 'progress-bar';
+
+    } else {
+
+        // Bootstrap 1 & 2 (@deprecated)
+        $classes = 'progress';
+
+    }
 
     // Color
-    if( $color && $color != 'default' )
-    	$classes .= ' progress-'.$color;
+    if( $color ) {
+
+        if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '>=' ) ) {
+
+            // Bootstrap 3+
+            $classes .= ' progress-bar-'.$color;
+
+        } else {
+
+            // Bootstrap 1 & 2 (@deprecated)
+            $classes .= ' progress-'.$color;
+        }
+    }
 
     // Striped?
-    if( $striped == 'true' )
-    	$classes .= ' progress-striped';
+    if( $striped == 'true' ) {
+    	if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '>=' ) ) {
+
+            // Bootstrap 3+
+            $wrap_classes .= ' progress-striped';
+
+        } else {
+
+            // Bootstrap 1 & 2 (@deprecated)
+            $classes .= ' progress-striped';
+
+        }
+    }
 
     // Animated?
-    if( $animate == 'true' )
-    	$classes .= ' active';
+    if( $animate == 'true' ) {
+        if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '>=' ) ) {
+
+            // Bootstrap 3
+            $wrap_classes .= ' active';
+
+        } else {
+
+            // Bootstrap 1 & 2 (@deprecated)
+            $classes .= ' active';
+
+        }
+    }
 
     // Output
-    $output = '<div class="'.$classes.'"><div class="bar" style="width: '.$percent.'%;"></div></div>';
+    if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '>=' ) ) {
+
+        // Bootstrap 3+
+        $output  = '<div class="'.$wrap_classes.'">';
+        $output .= '    <div class="'.$classes.'" role="progressbar" aria-valuenow="'.$percent.'" aria-valuemin="0" aria-valuemax="100" style="width: '.$percent.'%;">';
+        $output .= '        <span class="sr-only">'.$percent.'%</span>';
+        $output .= '    </div>';
+        $output .= '</div>';
+
+    } else {
+
+        // Bootstrap 1 & 2 (@deprecated)
+        $output  = '<div class="'.$classes.'">';
+        $output .= '    <div class="bar" style="width: '.$percent.'%;"></div>';
+        $output .= '</div>';
+
+    }
+
 
     return $output;
 }
@@ -398,7 +500,7 @@ function themeblvd_shortcode_popup( $atts, $content = null ) {
     $default = array(
     	'text' 			=> 'Link Text', // Text for link or button leading to popup
 		'title' 		=> '', 			// Title for anchor, will default to "text" option
-		'color' 		=> '', 			// Color of button, only applies if button style is selected
+		'color' 		=> 'default', 	// Color of button, only applies if button style is selected
 		'size'			=> '',			// Size of button,
 		'icon_before'	=> '', 			// Icon before button or link's text
 		'icon_after' 	=> '', 			// Icon after button or link's text
@@ -412,15 +514,18 @@ function themeblvd_shortcode_popup( $atts, $content = null ) {
 
     // Button/Link
     $link = '';
-    if( $title )
+    if( $title ) {
     	$title = $text;
+    }
+
     $link = themeblvd_button( $text, '#'.$popup_id, $color, null, $size, null, $title, $icon_before, $icon_after, 'data-toggle="modal"' );
 	$link = apply_filters('themeblvd_the_content', $link);
 
     // Classes for popup
-    $classes = 'modal hide';
-    if( $animate == 'true' )
+    $classes = 'modal';
+    if( $animate == 'true' ) {
     	$classes .= ' fade';
+    }
 
     // Header
     $header_html = '';
@@ -433,14 +538,27 @@ function themeblvd_shortcode_popup( $atts, $content = null ) {
 
     // Output
     $output  = $link;
-    $output .= '<div class="'.$classes.'" id="'.$popup_id.'">';
+    $output .= '<div class="'.$classes.'" id="'.$popup_id.'" tabindex="-1" role="dialog" aria-hidden="true">';
+    $output .= '<div class="modal-dialog">';
+    $output .= '<div class="modal-content">';
+
     $output .= $header_html;
+
     $output .= '<div class="modal-body">';
     $output .= apply_filters('themeblvd_the_content', $content);
     $output .= '</div><!-- .modal-body (end) -->';
     $output .= '<div class="modal-footer">';
-    $output .= '<a href="#" class="btn" data-dismiss="modal">'.themeblvd_get_local('close').'</a>';
+
+    $close_class = 'btn btn-default';
+    if ( apply_filters( 'themeblvd_btn_gradient', false ) ) {
+        $close_class .= ' btn-gradient';
+    }
+    $output .= '<a href="#" class="'.$close_class.'" data-dismiss="modal">'.themeblvd_get_local('close').'</a>';
+
     $output .= '</div><!-- .modal-footer (end) -->';
+
+    $output .= '</div><!-- .modal-content (end) -->';
+    $output .= '</div><!-- .modal-dialog (end) -->';
     $output .= '</div><!-- .modal (end) -->';
 
     return $output;
@@ -592,6 +710,35 @@ function themeblvd_shortcode_lightbox_gallery( $atts, $content = null ) {
 
 }
 
+/**
+ * Blockquote
+ *
+ * @since 1.2.0
+ *
+ * @param array $atts Standard WordPress shortcode attributes
+ * @param string $content The enclosed content
+ */
+function themeblvd_shortcode_blockquote( $atts ) {
+
+    $defaults = array(
+        'quote'         => '',
+        'source'        => '',      // Source of quote
+        'source_link'   => '',      // URL to link source to
+        'align'         => '',      // How to align blockquote - left, right
+        'max_width'     => '',      // Meant to be used with align left/right - 300px, 50%, etc
+        'class'         => ''       // Any additional CSS classes
+    );
+    $atts = wp_parse_args( $atts, $defaults );
+
+    $output = '';
+
+    if ( function_exists( 'themeblvd_get_blockquote' ) ) {
+        $output = themeblvd_get_blockquote( $atts );
+    }
+
+    return $output;
+}
+
 /*-----------------------------------------------------------*/
 /* Inline Elements
 /*-----------------------------------------------------------*/
@@ -684,14 +831,17 @@ function themeblvd_shortcode_icon_link( $atts, $content = null ) {
 	    	break;
     }
 
-    if( ! $title )
+    if( ! $title ) {
         $title = $content;
-    if( $class )
-        $class = ' '.$class;
+    }
 
-    $output  = '<span class="tb-icon-link'.$class.'">'; // Can't use class starting in "icon-" or it will conflict with Bootstrap
-    $output .= '<i class="icon-'.$icon.'"></i>';
-    $output .= '<a href="'.$link.'" title="'.$title.'" class="icon-link-'.$icon.'" target="'.$target.'">'.$content.'</a>';
+    if( $class ) {
+        $class = ' '.$class;
+    }
+
+    $output  = sprintf( '<span class="tb-icon-link%s">', $class );
+    $output .= sprintf( '<i class="icon fa fa-%s"></i>', $icon );
+    $output .= sprintf( '<a href="%s" title="%s" class="icon-link-%s" target="%s">%s</a>', $link, $title, $icon, $target, $content );
     $output .= '</span>';
 
     return $output;
@@ -734,18 +884,29 @@ function themeblvd_shortcode_dropcap( $atts, $content = null ) {
 function themeblvd_shortcode_label( $atts, $content = null ) {
 
     $default = array(
-        'style' => '', // default, success, warning, important, info, inverse
+        'style' => 'default', // default, success, warning, danger, info
         'icon'	=> ''
     );
     extract( shortcode_atts( $default, $atts ) );
 
     $class = 'label';
 
-    if( $style && $style != 'default' )
-    	$class .= ' label-'.$style;
+    // Convert styles from Bootstrap 1 & 2 to Bootstrap 3.
+    if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '>=' ) ) {
+        if ( 'important' == $style ) {
+            $style = 'danger';
+        }
+    }
 
-    if( $icon )
+    if ( ! $style ) {
+        $style = 'default';
+    }
+
+    $class .= ' label-'.$style;
+
+    if ( $icon ) {
     	$content = '<i class="icon-'.$icon.'"></i> '.$content;
+    }
 
     return '<span class="'.$class.'">'.do_shortcode($content).'</span><!-- .label (end) -->';
 }
@@ -753,7 +914,7 @@ function themeblvd_shortcode_label( $atts, $content = null ) {
 /**
  * Vector Icon (from Bootstrap and Font Awesome)
  *
- * <i class="icon-{whatever}"></i>
+ * <i class="fa fa-{whatever}"></i>
  *
  * @since 1.0.0
  *
@@ -770,10 +931,16 @@ function themeblvd_shortcode_vector_icon( $atts ) {
 
     $size_style = '';
 
-    if( $size )
-    		$size_style = ' style="font-size:'.$size.';"';
+    if( $size ) {
+        $size_style = sprintf( ' style="font-size: %s;"', $size );
+    }
 
-    return '<i class="icon-'.$icon.'"'.$size_style.'></i>';
+    $class = sprintf( 'fa fa-%s', $icon ); // FontAwesome 4
+    if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '<' ) ) {
+        $class = sprintf( 'icon-%s', $icon ); // FontAwesome 1-3
+    }
+
+    return sprintf( '<i class="%s"%s></i>', $class, $size_style );
 }
 
 /*-----------------------------------------------------------*/
@@ -793,11 +960,10 @@ function themeblvd_shortcode_tabs( $atts, $content = null ) {
 
     $default = array(
         'style' 		=> 'framed', 		// framed, open
-        'nav'			=> 'tabs_above',	// tabs_above, tabs_right, tabs_below, tabs_left, pills_above, pills_below
+        'nav'			=> 'tabs',          // tabs, pills
         'height' 		=> '' 				// Fixed height for tabs, true or false
     );
     extract( shortcode_atts( $default, $atts ) );
-
 
     // Since we use the $atts to loop through and
     // display the tabs, we need to remove the other
@@ -866,8 +1032,22 @@ function themeblvd_shortcode_tabs( $atts, $content = null ) {
  * @return string $output Content to output for shortcode
  */
 function themeblvd_shortcode_accordion( $atts, $content = null ) {
-	$accordion_id = uniqid( 'accordion_'.rand() );
-	return '<div id="'.$accordion_id.'" class="tb-accordion">'.do_shortcode($content).'</div>';
+
+    $accordion_id = uniqid( 'accordion_'.rand() );
+
+    if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '>=' ) ) {
+
+        // Bootstrap 3
+        $output = sprintf( '<div id="%s" class="tb-accordion panel-group">%s</div>', $accordion_id, do_shortcode( $content ) );
+
+    } else {
+
+        // Bootstrap 1 & 2
+        $output = sprintf( '<div id="%s" class="tb-accordion">%s</div>', $accordion_id, do_shortcode( $content ) );
+
+    }
+
+    return $output;
 }
 
 /**
@@ -881,35 +1061,76 @@ function themeblvd_shortcode_accordion( $atts, $content = null ) {
  */
 function themeblvd_shortcode_toggle( $atts, $content = null ) {
 
-    $last = isset( $atts[0] ) ? $last = ' accordion-group-last' : null;
 	$default = array(
         'title' => '',
         'open'  => 'false'
     );
 	extract( shortcode_atts( $default, $atts ) );
 
-    // Is toggle open?
-    $classes = 'accordion-body collapse';
-    $icon = 'icon-plus-sign';
-    if( $open == 'true' ) {
-        $classes .= ' in';
-        $icon = 'icon-minus-sign';
-    }
-
     // Individual toggle ID (NOT the Accordion ID)
 	$toggle_id = uniqid( 'toggle_'.rand() );
 
-    // Start output
-	$output  = '<div class="accordion-group'.$last.'">';
-	$output .= '<div class="accordion-heading">';
-	$output .= '<a class="accordion-toggle" data-toggle="collapse" href="#'.$toggle_id.'"><i class="'.$icon.' switch-me"></i> '.$title.'</a>';
-	$output .= '</div><!-- .accordion-heading (end) -->';
-	$output .= '<div id="'.$toggle_id.'" class="'.$classes.'">';
-	$output .= '<div class="accordion-inner">';
-	$output .= apply_filters( 'themeblvd_the_content', $content );
-	$output .= '</div><!-- .accordion-inner (end) -->';
-	$output .= '</div><!-- .accordion-body (end) -->';
-	$output .= '</div><!-- .accordion-group (end) -->';
+    if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '>=' ) ) {
+
+        // Bootstrap 3
+
+        // Last toggle?
+        $last = isset( $atts[0] ) ? $last = ' panel-last' : null;
+
+        // Is toggle open?
+        $classes = 'panel-collapse collapse';
+        $icon = 'plus-circle';
+        if( $open == 'true' ) {
+            $classes .= ' in';
+            $icon = 'minus-circle';
+        }
+
+        // Bootstrap color
+        $color = apply_filters( 'themeblvd_toggle_shortcode_color', 'default' );
+
+        // Bootstrap 3 output
+        $output = '
+            <div class="tb-panel panel panel-'.$color.$last.'">
+                <div class="panel-heading">
+                    <a class="panel-title" data-toggle="collapse" data-parent="" href="#'.$toggle_id.'">
+                        <i class="fa fa-'.$icon.' switch-me"></i> '.$title.'
+                    </a>
+                </div><!-- .panel-heading (end) -->
+                <div id="'.$toggle_id.'" class="'.$classes.'">
+                    <div class="panel-body">
+                        '.apply_filters( 'themeblvd_the_content', $content ).'
+                    </div><!-- .panel-body (end) -->
+                </div><!-- .panel-collapse (end) -->
+            </div><!-- .panel (end) -->';
+
+    } else {
+
+        // Bootstrap 1 & 2 output
+
+        // Last toggle?
+        $last = isset( $atts[0] ) ? $last = ' accordion-group-last' : null;
+
+        // Is toggle open?
+        $classes = 'accordion-body collapse';
+        $icon = 'sign';
+        if( $open == 'true' ) {
+            $classes .= ' in';
+            $icon = 'minus-sign';
+        }
+
+        // Output
+        $output  = '<div class="accordion-group'.$last.'">';
+    	$output .= '<div class="accordion-heading">';
+    	$output .= '<a class="accordion-toggle" data-toggle="collapse" href="#'.$toggle_id.'"><i class="icon-'.$icon.' switch-me"></i> '.$title.'</a>';
+    	$output .= '</div><!-- .accordion-heading (end) -->';
+    	$output .= '<div id="'.$toggle_id.'" class="'.$classes.'">';
+    	$output .= '<div class="accordion-inner">';
+    	$output .= apply_filters( 'themeblvd_the_content', $content );
+    	$output .= '</div><!-- .accordion-inner (end) -->';
+    	$output .= '</div><!-- .accordion-body (end) -->';
+    	$output .= '</div><!-- .accordion-group (end) -->';
+
+    }
 
     return $output;
 }

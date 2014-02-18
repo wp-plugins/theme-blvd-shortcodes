@@ -2,7 +2,7 @@
 /*
 Plugin Name: Theme Blvd Shortcodes
 Description: This plugin works in conjuction with the Theme Blvd framework to create shortcodes for many of the framework's internal elements.
-Version: 1.1.1
+Version: 1.2.0
 Author: Theme Blvd
 Author URI: http://themeblvd.com
 License: GPL2
@@ -25,7 +25,7 @@ License: GPL2
 
 */
 
-define( 'TB_SHORTCODES_PLUGIN_VERSION', '1.1.1' );
+define( 'TB_SHORTCODES_PLUGIN_VERSION', '1.2.0' );
 define( 'TB_SHORTCODES_PLUGIN_DIR', dirname( __FILE__ ) );
 define( 'TB_SHORTCODES_PLUGIN_URI', plugins_url( '' , __FILE__ ) );
 
@@ -111,6 +111,7 @@ function themeblvd_shortcodes_init() {
 		add_shortcode( 'popup', 'themeblvd_shortcode_popup' );
 		add_shortcode( 'lightbox', 'themeblvd_shortcode_lightbox' );
 		add_shortcode( 'lightbox_gallery', 'themeblvd_shortcode_lightbox_gallery' );
+		add_shortcode( 'blockquote', 'themeblvd_shortcode_blockquote' );
 
 		// Inline Elements
 		add_shortcode( 'icon', 'themeblvd_shortcode_icon' );
