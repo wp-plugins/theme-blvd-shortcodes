@@ -466,7 +466,9 @@ $plugin_url = TB_SHORTCODES_PLUGIN_URI . '/includes/admin/generator/assets/image
 										a.addWithDialog(c,"Divider","divider");
 										a.addWithDialog(c,"Icon List","iconlist");
 										a.addWithDialog(c,"Info Box","box");
+										a.addWithDialog(c,"Jumbotron","jumbotron");
 										a.addWithDialog(c,"Lightbox","lightbox");
+										a.addWithDialog(c,"Panel","panel");
 										a.addWithDialog(c,"Popup","popup");
 										a.addWithDialog(c,"Progress Bar","progress_bar");
 									c=b.addMenu({title:"Inline Elements"});

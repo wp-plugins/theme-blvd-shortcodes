@@ -2,7 +2,7 @@
 Author URI: http://www.jasonbobich.com
 Contributors: themeblvd
 Tags: shortcodes, bootstrap, Theme Blvd, themeblvd, Jason Bobich
-Stable Tag: 1.2.0
+Stable Tag: 1.3.0
 
 This plugin works in conjuction with the Theme Blvd framework to create shortcodes for many of the framework's internal elements.
 
@@ -12,23 +12,23 @@ Within the Theme Blvd framework there are many internal elements and other 3rd p
 
 After activating this plugin, you'll know it's ready to go by viewing the Edit Page or Edit Post screen and seeing the plugin's [shortcode generator](http://shortcodes.themeblvd.com/generator) within your Visual Editor. You'll then have access to the following shortcodes for use within your website.
 
-= Alerts & Info Boxes =
-
-These shortcodes provide you with a quick way to inform your readers of important information within a post or page.
-
-[View Documentation and Examples](http://shortcodes.themeblvd.com/shortcodes/alerts/)
-
 = Buttons =
 
 Use Twitter Bootstrap's button styling along with tons of additional color options added by the Theme Blvd framework.
 
-[View Documentation and Examples](hhttp://shortcodes.themeblvd.com/shortcodes/buttons/)
+[View Documentation and Examples](http://shortcodes.themeblvd.com/shortcodes/buttons/)
 
 = Columns =
 
 The column shortcodes allow you to structure your content into rows of various size columns within your pages and posts.
 
 [View Documentation and Examples](http://shortcodes.themeblvd.com/shortcodes/columns/)
+
+= Components =
+
+Thanks to Twitter Bootstrap integration, this group of shortcodes adds some extra goodies for your website.
+
+[View Documentation and Examples](http://shortcodes.themeblvd.com/shortcodes/small-components/)
 
 = Display Posts =
 
@@ -54,11 +54,11 @@ When using the [Theme Blvd Sliders](http://wordpress.org/extend/plugins/theme-bl
 
 [View Documentation and Examples](http://shortcodes.themeblvd.com/shortcodes/shortcodes-sliders/)
 
-= Small Components =
+= Gallery Slider =
 
-Thanks to Twitter Bootstrap integration, this group of shortcodes adds some extra goodies for your website.
+In a similar way that you'd create a typical WordPress gallery, you can create a quick slider of images from your media library.
 
-[View Documentation and Examples](http://shortcodes.themeblvd.com/shortcodes/small-components/)
+[View Documentation and Examples](http://shortcodes.themeblvd.com/shortcodes/shortcodes-gallery-slider/)
 
 = Tabs & Toggles =
 
@@ -90,6 +90,17 @@ Any content wrapped in the `[raw]` shortcode will allow you to escape any automa
 1. Shortcode Generator
 
 == Changelog ==
+
+= 1.3.0 =
+
+* Added `[gallery_slider]` shortcode (requires Theme Blvd Framework 2.4.2+).
+* Added `[jumbotron]` shortcode (requires Theme Blvd Framework 2.4.2+).
+* Added `[panel]` shortcode (requires Theme Blvd Framework 2.4.0+).
+* Added "gallery" option to Mini Post Grid - Ex: `[mini_post_grid gallery="1,2,3,4"]`
+* Added "color" option to `[icon_link]` for color of the icon.
+* Added "color", "rotate", "flip", and "class" options to `[vector_icon]` shortcode.
+* Fixed "icon" option for `[label]` with FontAwesome 4.
+* Updated `[icon_list]` to use FontAwesome 4's "fa-ul" and "fa-li" classes.
 
 = 1.2.0 =
 

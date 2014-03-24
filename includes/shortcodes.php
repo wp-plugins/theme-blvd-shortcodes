@@ -26,6 +26,8 @@
  *      - lightbox          => @since 1.1.0
  *      - lightbox_gallery  => @since 1.1.0
  *      - blockquote        => @since 1.2.0
+ *      - jumbotron         => @since 1.3.0
+ *      - panel             => @since 1.3.0
  * (3) Inline Elements
  *		- icon				=> @since 1.0.0
  *		- icon_link 		=> @since 1.0.0
@@ -41,6 +43,7 @@
  * 		- slider			=> @since 1.0.0
  *		- post_grid_slider	=> @since 1.0.0
  *		- post_list_slider	=> @since 1.0.0
+ *      - gallery_slider    => @since 1.3.0
  * (6) Display Posts
  *		- post_grid			=> @since 1.0.0
  *		- post_list			=> @since 1.0.0
@@ -221,10 +224,10 @@ function themeblvd_shortcode_icon_list( $atts, $content = null ) {
     }
 
     // Add in fontawesome icon
-    $content = str_replace('<ul>', '<ul class="tb-icon-list">', $content );
+    $content = str_replace('<ul>', '<ul class="tb-icon-list fa-ul">', $content );
 
     if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '>=' ) ) {
-        $content = str_replace('<li>', '<li><i class="fa fa-'.$icon.'"'.$color_css.'></i> ', $content );
+        $content = str_replace('<li>', '<li><i class="fa-li fa fa-'.$icon.'"'.$color_css.'></i> ', $content );
     } else {
         $content = str_replace('<li>', '<li><i class="icon-'.$icon.'"'.$color_css.'></i> ', $content );
     }
@@ -325,7 +328,7 @@ function themeblvd_shortcode_box( $atts, $content = null ) {
 function themeblvd_shortcode_alert( $atts, $content = null ) {
 
     $default = array(
-        'style' => 'blue', // info, success, danger, warning
+        'style' => 'info', // info, success, danger, warning
         'close' => 'false' // true, false
     );
     extract( shortcode_atts( $default, $atts ) );
@@ -585,7 +588,7 @@ function themeblvd_shortcode_lightbox( $atts, $content = null ) {
         'link'      => '',          // URL being linked to in the lightbox popup
         'thumb'     => '',          // Text or Image URL being used for link to lightbox
         'width'     => '',          // Width of tumbnail image linking to lighbox
-        'align'     => '',          // Alignment of thumbnail image
+        'align'     => 'none',      // Alignment of thumbnail image
         'title'     => '',          // Title displayed in lightbox link
         'frame'     => 'true',      // Whether or not to display frame around thumbnail
         'frame_max' => 'true',      // Whether or not the frame takes on the image's width as a max-width (super-secret and not in generator)
@@ -650,10 +653,10 @@ function themeblvd_shortcode_lightbox( $atts, $content = null ) {
     if( $atts['frame'] == 'true' && $has_thumb_img ) {
 
         // Wrapping CSS classes
-        $wrap_classes = '';
+        $wrap_classes = 'tb-lightbox-shortcode';
 
         if( $atts['align'] != 'none' ) {
-            $wrap_classes .= 'align'.$atts['align'];
+            $wrap_classes .= ' align'.$atts['align'];
         }
 
         if( $atts['class'] ) {
@@ -728,13 +731,103 @@ function themeblvd_shortcode_blockquote( $atts ) {
         'max_width'     => '',      // Meant to be used with align left/right - 300px, 50%, etc
         'class'         => ''       // Any additional CSS classes
     );
-    $atts = wp_parse_args( $atts, $defaults );
+    $atts = shortcode_atts( $defaults, $atts );
 
-    $output = '';
+    $output = __('Your theme does not support the [blockquote] shortcode.', 'themeblvd_shortcodes');
 
     if ( function_exists( 'themeblvd_get_blockquote' ) ) {
         $output = themeblvd_get_blockquote( $atts );
     }
+
+    return $output;
+}
+
+/**
+ * Jumbotron
+ *
+ * @since 1.3.0
+ *
+ * @param array $atts Standard WordPress shortcode attributes
+ * @param string $content Content in shortcode
+ * @param string $content The enclosed content
+ */
+function themeblvd_shortcode_jumbotron( $atts, $content = null ) {
+
+    $defaults = array(
+        'title'         => '',      // Title of unit
+        'text_align'    => 'left',  // How to align text - left, right, center
+        'align'         => '',      // How to align jumbotron - left, right
+        'max_width'     => '',      // Meant to be used with align left/right - 300px, 50%, etc
+        'class'         => '',      // Any additional CSS classes
+        'wpautop'       => 'true'   // Whether to apply wpautop on content
+    );
+    $atts = shortcode_atts( $defaults, $atts );
+
+    $output = __('Your theme does not support the [jumbotron] shortcode.', 'themeblvd_shortcodes');
+
+    if ( function_exists( 'themeblvd_get_jumbotron' ) ) {
+
+        if ( $atts['wpautop'] === 'false' ) {
+            $atts['wpautop'] = false;
+        } else {
+            $atts['wpautop'] = true;
+        }
+
+        $output = themeblvd_get_jumbotron( $atts, $content );
+    }
+
+    return $output;
+}
+
+/**
+ * Panel
+ *
+ * @since 1.3.0
+ *
+ * @param array $atts Standard WordPress shortcode attributes
+ * @param string $content Content in shortcode
+ * @param string $content The enclosed content
+ */
+function themeblvd_shortcode_panel( $atts, $content = null ) {
+
+    $defaults = array(
+        'style'         => 'default',   // Style of panel - primary, success, info, warning, danger
+        'title'         => '',          // Header for panel
+        'footer'        => '',          // Footer for panel
+        'text_align'    => 'left',      // How to align text - left, right, center
+        'align'         => '',          // How to align jumbotron - left, right
+        'max_width'     => '',          // Meant to be used with align left/right - 300px, 50%, etc
+        'class'         => '',          // Any additional CSS classes
+        'wpautop'       => 'true'       // Whether to apply wpautop on content
+    );
+    $atts = shortcode_atts( $defaults, $atts );
+
+    // CSS classes
+    $class = sprintf( 'panel panel-%s text-%s', $atts['style'], $atts['text_align'] );
+
+    if ( $atts['class'] ) {
+        $class .= ' '.$atts['class'];
+    }
+
+    // WP auto?
+    if ( $atts['wpautop'] == 'true' ) {
+        $content = wpautop( $content );
+    }
+
+    // Construct intial panel
+    $output = sprintf( '<div class="%s">', $class );
+
+    if ( $atts['title'] ) {
+        $output .= sprintf( '<div class="panel-heading"><h3 class="panel-title">%s</h3></div>', $atts['title'] );
+    }
+
+    $output .= sprintf( '<div class="panel-body">%s</div>', do_shortcode( $content ) );
+
+    if ( $atts['footer'] ) {
+        $output .= sprintf( '<div class="panel-footer">%s</div>', $atts['footer'] );
+    }
+
+    $output .= '</div><!-- .panel (end) -->';
 
     return $output;
 }
@@ -790,7 +883,8 @@ function themeblvd_shortcode_icon( $atts, $content = null ) {
 function themeblvd_shortcode_icon_link( $atts, $content = null ) {
 
     $default = array(
-        'icon' 		=> '', // alert, approved, camera, cart, doc, download, media, note, notice, quote, warning
+        'icon' 		=> '',      // alert, approved, camera, cart, doc, download, media, note, notice, quote, warning
+        'color'     => '',      // text color of icon - Ex: #666
         'link' 		=> '',
         'target' 	=> '_self',
         'class' 	=> '',
@@ -839,8 +933,13 @@ function themeblvd_shortcode_icon_link( $atts, $content = null ) {
         $class = ' '.$class;
     }
 
+    $style ='';
+    if ( $color ) {
+        $style = sprintf( 'color: %s', $color );
+    }
+
     $output  = sprintf( '<span class="tb-icon-link%s">', $class );
-    $output .= sprintf( '<i class="icon fa fa-%s"></i>', $icon );
+    $output .= sprintf( '<i class="icon fa fa-%s" style="%s"></i>', $icon, $style );
     $output .= sprintf( '<a href="%s" title="%s" class="icon-link-%s" target="%s">%s</a>', $link, $title, $icon, $target, $content );
     $output .= '</span>';
 
@@ -905,7 +1004,7 @@ function themeblvd_shortcode_label( $atts, $content = null ) {
     $class .= ' label-'.$style;
 
     if ( $icon ) {
-    	$content = '<i class="icon-'.$icon.'"></i> '.$content;
+    	$content = '<i class="fa fa-'.$icon.'"></i> '.$content;
     }
 
     return '<span class="'.$class.'">'.do_shortcode($content).'</span><!-- .label (end) -->';
@@ -924,23 +1023,45 @@ function themeblvd_shortcode_label( $atts, $content = null ) {
 function themeblvd_shortcode_vector_icon( $atts ) {
 
     $default = array(
-        'icon' 	=> 'pencil',
-        'size'	=> ''
+        'icon'      => 'pencil',    // FontAwesome icon id
+        'color'     => '',          // Text color of icon - Ex: #666
+        'size'      => '',          // Font size for icon - Ex: 1.5em, 20px, etc
+        'rotate'    => '',          // Optional rotation of the icon - 90, 180, 270
+        'flip'      => '',          // Optional flip of the icon - horizontal, vertical
+        'class'     => ''           // CSS class
     );
     extract( shortcode_atts( $default, $atts ) );
 
-    $size_style = '';
+    // Remove "fa-" if the user added it to the icon ID
+    $icon = str_replace('fa-', '', $icon);
 
-    if( $size ) {
-        $size_style = sprintf( ' style="font-size: %s;"', $size );
+    $style = '';
+
+    if ( $size ) {
+        $style .= sprintf( 'font-size: %s;', $size );
+    }
+    if ( $color ) {
+        $style .= sprintf( 'color: %s;', $color );
     }
 
-    $class = sprintf( 'fa fa-%s', $icon ); // FontAwesome 4
+    $icon_class = sprintf( 'fa fa-%s', $icon ); // FontAwesome 4
     if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.0', '<' ) ) {
-        $class = sprintf( 'icon-%s', $icon ); // FontAwesome 1-3
+        $icon_class = sprintf( 'icon-%s', $icon ); // FontAwesome 1-3
     }
 
-    return sprintf( '<i class="%s"%s></i>', $class, $size_style );
+    if ( $rotate ) {
+        $icon_class .= sprintf( ' fa-rotate-%s', $rotate );
+    }
+
+    if ( $flip ) {
+        $icon_class .= sprintf( ' fa-flip-%s', $flip );
+    }
+
+    if ( $class ) {
+        $icon_class .= sprintf( ' %s', $class );
+    }
+
+    return sprintf( '<i class="%s" style="%s"></i>', $icon_class, $style );
 }
 
 /*-----------------------------------------------------------*/
@@ -1349,6 +1470,51 @@ function themeblvd_shortcode_post_list_slider( $atts ) {
 	return ob_get_clean();
 }
 
+/**
+ * Gallery Slider
+ *
+ * @since 1.3.0
+ *
+ * @param array $atts Standard WordPress shortcode attributes
+ */
+function themeblvd_shortcode_gallery_slider( $atts ) {
+
+    // This shortcode requires Theme Blvd Framework 2.4.2+
+    if ( version_compare( TB_FRAMEWORK_VERSION, '2.4.2', '<' ) ) {
+        return __( 'Your theme does not support the [gallery_slider] shortcode. You must be using a theme with Theme Blvd Framework 2.4.2+', 'themeblvd_shortcodes' );
+    }
+
+    $default = array(
+        'ids'           => '',                  // Comma separated attachments ID's
+        'size'          => '',                  // Crop size for images
+        'thumb_size'    => 'square_smallest',   // Size of nav thumbnail images
+        'interval'      => '5000',              // Milliseconds between transitions
+        'pause'         => 'true',              // Whether to pause on hover
+        'wrap'          => 'true',              // Whether sliders continues auto rotate after first pass
+        'nav_standard'  => 'false',             // Whether to show standard nav indicator dots
+        'nav_arrows'    => 'true',              // Whether to show standard nav arrows
+        'nav_thumbs'    => 'true'               // Whether to show nav thumbnails (added by Theme Blvd framework)
+    );
+    $atts = shortcode_atts( $default, $atts );
+
+    // Setup [gallery]
+    $gallery = sprintf( '[gallery ids="%s"]', $atts['ids'] );
+
+    // Remove ID's from $atts
+    unset( $atts['ids'] );
+
+    // Convert booleans
+    foreach( $atts as $key => $value ) {
+        if ( $value === 'true' ) {
+            $atts[$key] = true;
+        } else if ( $value === 'false' ) {
+            $atts[$key] = false;
+        }
+    }
+
+    return themeblvd_get_gallery_slider( $gallery, $atts );
+}
+
 /*-----------------------------------------------------------*/
 /* Display Posts
 /*-----------------------------------------------------------*/
@@ -1530,7 +1696,7 @@ function themeblvd_shortcode_mini_post_grid( $atts ) {
         'query'         => '',          // custom query string
         'thumb'         => 'smaller',   // thumbnail size - small, smaller, or smallest
         'align'         => 'left',      // alignment of grid - left, right, or center
-        'gallery'       => ''           // post ID to pull gallery attachments from, only used if not blank
+        'gallery'       => ''           // Comma separated list of attachmentn IDs - 1,2,3,4
 	);
 	extract( shortcode_atts( $default, $atts ) );
 
@@ -1556,6 +1722,10 @@ function themeblvd_shortcode_mini_post_grid( $atts ) {
         $query .= 'offset='.$offset.'&';
         $query .= 'suppress_filters=false'; // Mainly for WPML compat
 
+    }
+
+    if ( $gallery ) {
+        $gallery = sprintf( '[gallery ids="%s" link="file"]', $gallery );
     }
 
 	// Output
