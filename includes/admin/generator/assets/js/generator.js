@@ -9,102 +9,29 @@ jQuery(document).ready(function($){
 		/**
 		 * Setup preview area for shortcode
 		 */
-		preview : function( section ) {
+		preview: function( $section ) {
 
-			var type = section.data('type'),
+			var type = $section.data('type'),
 				markup = '',
-				preview = section.find('.shortcode-preview'),
+				$preview = $section.find('.shortcode-preview'),
 				content = '',
-				include_content = preview.data('content'),
-				raw = preview.data('raw'),
-				clean = preview.data('clean'),
-				arg,
-				val;
+				include_content = $preview.data('content'),
+				raw = $preview.data('raw'),
+				clean = $preview.data('clean'),
+				counter = 0,
+				arg = '',
+				val = '',
+				custom_button = false;
 
 			if ( raw ) {
 				markup += '[raw]<br>';
 			}
 
-			if ( type == 'column' ) {
+			if ( type == 'tabs' ) {
 
-				var num = section.find('.column-num').val(),
-					setup = section.find('.column-width-'+num+' select').val(),
-					setup = setup.split('-'),
-					column = '',
-					col_type;
-
-				for ( var i = 0; i < num; i++ ) {
-
-					column = '';
-
-					switch(setup[i]) {
-
-						case 'grid_3' :
-							col_type = 'one_fourth';
-							break;
-
-						case 'grid_4' :
-							col_type = 'one_third';
-							break;
-
-						case 'grid_6' :
-							col_type = 'one_half';
-							break;
-
-						case 'grid_8' :
-							col_type = 'two_third';
-							break;
-
-						case 'grid_9' :
-							col_type = 'three_fourth';
-							break;
-
-						case 'grid_fifth_1' :
-							col_type = 'one_fifth';
-							break;
-
-						case 'grid_fifth_2' :
-							col_type = 'two_fifth';
-							break;
-
-						case 'grid_fifth_3' :
-							col_type = 'three_fifth';
-							break;
-
-						case 'grid_fifth_4' :
-							col_type = 'four_fifth';
-							break;
-
-						case 'grid_tenth_3' :
-							col_type = 'three_tenth';
-							break;
-
-						case 'grid_tenth_7' :
-							col_type = 'seven_tenth';
-							break;
-
-					}
-
-					column += '['+col_type;
-
-					if ( i == num-1 ) {
-						column += ' last';
-					}
-
-					column += ']<br>';
-					column += 'Column '+(i+1)+'...<br>';
-					column += '[/'+col_type+']<br>';
-
-					markup += column;
-				}
-
-				markup += '[clear]';
-
-			} else if ( type == 'tabs' ) {
-
-				var num = section.find('select[name="tabs[num]"]').val(),
-					style = section.find('select[name="tabs[style]"]').val(),
-					nav = section.find('select[name="tabs[nav]"]').val();
+				var num = $section.find('select[name="tabs[num]"]').val(),
+					style = $section.find('select[name="tabs[style]"]').val(),
+					nav = $section.find('select[name="tabs[nav]"]').val();
 
 				markup += '[tabs style="'+style+'" nav="'+nav+'"';
 
@@ -122,7 +49,7 @@ jQuery(document).ready(function($){
 
 			} else if ( type == 'accordion' ) {
 
-				var num = section.find('select[name="accordion[num]"]').val();
+				var num = $section.find('select[name="accordion[num]"]').val();
 
 				markup += '[accordion]<br>';
 
@@ -134,9 +61,9 @@ jQuery(document).ready(function($){
 
 			} else {
 
-				markup += '['+type+' ';
+				markup += '['+type;
 
-				section.find('.of-input, .of-radio-img-radio').each(function(){
+				$section.find('.of-input, .of-radio-img-radio, .tb-color-picker').each(function(){
 
 					if( $(this).hasClass('of-radio-img-radio') && !$(this).prop('checked') ) {
 						return;
@@ -145,12 +72,22 @@ jQuery(document).ready(function($){
 					arg = $(this).attr('id');
 					val = $(this).val();
 
+					// Any argments that should be skipped
+					if ( arg == 'custom_include_bg' || arg == 'custom_include_border' ) {
+						return;
+					}
+
+					// Check for custom button
+					if ( type == 'button' && arg == 'color' && val == 'custom' ) {
+						custom_button = true;
+					}
+
 					// Image radio's ID's aren't structured the same as other inputs
 					if ( $(this).hasClass('of-radio-img-radio') ) {
 						arg = arg.replace(new RegExp('_'+val, 'g'), '');
 					}
 
-					if ( val ) {
+					if ( val && val !== '0' ) {
 
 						if ( ( type == 'icon' || val != 'none' ) && arg != 'sc_content' ) {
 							markup += ' '+arg+'="'+val+'"';
@@ -160,7 +97,54 @@ jQuery(document).ready(function($){
 							content = val;
 						}
 					}
+
+					if ( arg != 'sc_content' ) {
+						counter++;
+					}
 				});
+
+				// Handle custom button arguments
+				if ( custom_button ) {
+
+					var button_args = {};
+
+					$section.find('.section-button').find('input.color-picker, .checkbox').each(function(){
+
+						var $el = $(this);
+
+						arg = $el.attr('id');
+						arg = arg.replace('custom_', '');
+
+						if ( $el.hasClass('checkbox') ) {
+							if ( $el.prop('checked') ) {
+								val = 'true';
+							} else {
+								val = 'false';
+							}
+						} else {
+							val = $el.val();
+						}
+
+						button_args[arg] = val;
+					});
+
+					for ( var arg in button_args ) {
+    					if ( button_args.hasOwnProperty(arg) ) {
+
+    						if ( arg == 'bg' || arg == 'border' ) {
+    							if ( arg == 'bg' && button_args.include_bg == 'true' ) {
+    								markup += ' '+arg+'="'+button_args[arg]+'"';
+    							} else if ( arg == 'border' && button_args.include_border == 'true' ) {
+    								markup += ' '+arg+'="'+button_args[arg]+'"';
+    							}
+    						} else {
+    							markup += ' '+arg+'="'+button_args[arg]+'"';
+    						}
+
+    					}
+    				}
+
+				}
 
 				markup += ']';
 
@@ -171,7 +155,7 @@ jQuery(document).ready(function($){
 					content = content.replace(/(\r\n|\n|\r)/gm, '<br>');
 
 					if ( ( raw || clean ) && content ) {
-						markup += '<br>'+content+'</br />';
+						markup += '<br>'+content+'<br>';
 					} else {
 						markup += content;
 					}
@@ -184,13 +168,157 @@ jQuery(document).ready(function($){
 				markup += '<br>[/raw]';
 			}
 
-			preview.attr('data-type', type).html(markup);
+			$preview.attr('data-type', type).html(markup);
+		},
+
+		/**
+		 * Columns
+		 */
+		preview_columns: function( $section ) {
+
+			var $preview = $section.find('.shortcode-preview'),
+				markup = '[raw]<br>',
+				wpautop = false;
+
+			if ( $section.find('#section-wpautop input').is(':checked') ) {
+				wpautop = true;
+			}
+
+			if ( typeof themeblvd_column_widths != 'undefined' ) {
+
+				// Theme Blvd Framework 2.5+
+
+				var setup = $section.find('.column-width-input').val(),
+					setup = setup.split('-');
+
+				for ( var i = 0; i < setup.length; i++ ) {
+
+					markup += '[column size="'+setup[i]+'"';
+
+					if ( wpautop ) {
+						markup += ' wpautop="true"';
+					}
+
+					markup += ']<br>';
+					markup += 'Column '+(i+1)+'...<br>';
+					markup += '[/column]';
+
+					if ( i < setup.length-1 ) {
+						markup += '<br>';
+					}
+				}
+
+			} else {
+
+				// @deprecated
+				var num = $section.find('.column-num').val(),
+					setup = $section.find('.column-width-'+num+' select').val(),
+					setup = setup.split('-'),
+					column = '',
+					size;
+
+				for ( var i = 0; i < num; i++ ) {
+
+					column = '';
+
+					switch(setup[i]) {
+
+						case 'grid_3' :
+							size = '1/4';
+							break;
+
+						case 'grid_4' :
+							size = '1/3';
+							break;
+
+						case 'grid_6' :
+							size = '1/2';
+							break;
+
+						case 'grid_8' :
+							size = '2/3';
+							break;
+
+						case 'grid_9' :
+							size = '3/4';
+							break;
+
+						case 'grid_fifth_1' :
+							size = '1/5';
+							break;
+
+						case 'grid_fifth_2' :
+							size = '2/5';
+							break;
+
+						case 'grid_fifth_3' :
+							size = '3/5';
+							break;
+
+						case 'grid_fifth_4' :
+							size = '4/5';
+							break;
+
+						case 'grid_tenth_3' :
+							size = '3/10';
+							break;
+
+						case 'grid_tenth_7' :
+							size = '7/10';
+							break;
+
+					}
+
+					column += '[column size="'+size+'"';
+
+					if (  wpautop ) {
+						column += ' wpautop="true"';
+					}
+
+					if ( i == num-1 ) {
+						column += ' last';
+					}
+
+					column += ']<br>';
+					column += 'Column '+(i+1)+'...<br>';
+					column += '[/column]';
+
+					if ( i < num-1 ) {
+						column += '<br>';
+					}
+
+					markup += column;
+				}
+			}
+
+			markup += '<br>[/raw]';
+
+			// Append final markup
+			$preview.html(markup);
+
+		},
+		columns_wpauto: function() {
+
+			var $el = $(this),
+				$preview = $(this).closest('.shortcode-options').find('.shortcode-preview'),
+				markup = $preview.html();
+
+			// Remove value, no matter what
+			markup = markup.replace(/ wpautop="true"/g, '');
+
+			// Add value, if wpautop is on
+			if ( $el.is(':checked') ) {
+				markup = markup.replace(/"]/g, '" wpautop="true"]');
+				markup = markup.replace(/last]/g, ' wpautop="true" last]');
+			}
+
+			$preview.html(markup);
 		},
 
 		/**
 		 * Tooltips
 		 */
-		tooltip_on : function( link ) {
+		tooltip_on: function( link ) {
 
 			var	container = link.closest('.tooltip-wrap'),
 				icon_id = link.data('tooltip-text'),
@@ -211,8 +339,9 @@ jQuery(document).ready(function($){
 				'left' : '50%',
 				'margin-left' : '-'+tooltip.width()/2+'px'
 			}).addClass('fade in');
+
 		},
-		tooltip_off : function( link ) {
+		tooltip_off: function( link ) {
 			link.closest('.tooltip-wrap').find('.tooltip').remove();
 		}
 
@@ -225,12 +354,14 @@ jQuery(document).ready(function($){
 	// Show modal window
 	$('.tb-insert-shortcode').on( 'click', function(){
 		$('#tb-shortcode-generator').show();
+		$('body').addClass('themeblvd-stop-scroll');
 		return false;
 	});
 
 	// Hide modal window
 	$('#tb-shortcode-generator .media-modal-close, #tb-shortcode-generator .media-modal-backdrop').on( 'click', function(){
 		$('#tb-shortcode-generator').hide();
+		$('body').removeClass('themeblvd-stop-scroll');
 		return false;
 	});
 
@@ -238,6 +369,8 @@ jQuery(document).ready(function($){
 	$('#tb-shortcode-generator').themeblvd('init');
 	$('#tb-shortcode-generator').themeblvd('options', 'bind');
 	$('#tb-shortcode-generator').themeblvd('options', 'setup');
+	$('#tb-shortcode-generator').themeblvd('options', 'column-widths');
+	// $('#tb-shortcode-generator').themeblvd('options', 'media-uploader');
 
 	// Generator left-side navigation
 	$('#tb-shortcode-generator .media-menu-item').on( 'click', function(){
@@ -320,15 +453,40 @@ jQuery(document).ready(function($){
 	/*---------------------------------------*/
 
 	// Build shortcode preview
-	$('#tb-shortcode-generator .of-input').on( 'change propertychange keyup input paste', function(){
+	$('#tb-shortcode-generator .of-input').on( 'change.generator propertychange.generator keyup.generator input.generator paste.generator', function(){
 		themeblvd_generator.preview( $(this).closest('.shortcode-options') );
 	});
-	$('#tb-shortcode-generator .of-radio-img-img').on( 'click', function(){
+	$('#tb-shortcode-generator .of-radio-img-img').on( 'click.generator', function(){
 		themeblvd_generator.preview( $(this).closest('.shortcode-options') );
 	});
-	$('#tb-shortcode-generator .shortcode-options-column select').on( 'change', function(){
+	$('#tb-shortcode-generator .shortcode-options-column select').on( 'change.generator', function(){
 		themeblvd_generator.preview( $(this).closest('.shortcode-options') );
 	});
+
+	// Unbind for columns; we'll use different handlers later.
+	$('#tb-shortcode-generator #wpautop').off('change.generator');
+	$('#tb-shortcode-generator .shortcode-options-column .section-columns select').off('change.generator');
+
+	if ( $.isFunction( $.fn.wpColorPicker ) ) {
+		$('#tb-shortcode-generator .color-picker, #tb-shortcode-generator .tb-color-picker').wpColorPicker({
+			change: function() {
+				themeblvd_generator.preview( $(this).closest('.shortcode-options') );
+			},
+			clear: function() {
+				themeblvd_generator.preview( $(this).closest('.shortcode-options') );
+			}
+		});
+
+		$('#tb-shortcode-generator .wp-color-result').on('click', function(){
+			themeblvd_generator.preview( $(this).closest('.shortcode-options') );
+		});
+
+		/*
+		$('#tb-shortcode-generator .iris-palette').on('click', function(){
+			themeblvd_generator.preview( $(this).closest('.shortcode-options') );
+		});
+		*/
+	}
 
 	/*---------------------------------------*/
 	/* Setup icon browser
@@ -382,15 +540,24 @@ jQuery(document).ready(function($){
 	// Select a color
 	$('#tb-shortcode-generator .color-browser .select-color').on( 'click', function(){
 
+		var $el = $(this);
+
 		// Select color
-		$(this).closest('.color-browser').find('.select-color-wrap').removeClass('selected');
-		$(this).closest('.select-color-wrap').addClass('selected');
+		$el.closest('.color-browser').find('.select-color-wrap').removeClass('selected');
+		$el.closest('.select-color-wrap').addClass('selected');
 
 		// Update input
-		$('#tb-shortcode-generator input[name="button[color]"]').val( $(this).data('color') );
+		$('#tb-shortcode-generator input[name="button[color]"]').val( $el.data('color') );
+
+		// Show/hide custom color option
+		if ( $el.data('color') == 'custom' ) {
+			$el.closest('.options-wrap').find('.section-button').show();
+		} else {
+			$el.closest('.options-wrap').find('.section-button').hide();
+		}
 
 		// Update live preview
-		themeblvd_generator.preview( $(this).closest('.shortcode-options') );
+		themeblvd_generator.preview( $el.closest('.shortcode-options') );
 
 		return false;
 
@@ -409,10 +576,27 @@ jQuery(document).ready(function($){
 	/* Columns
 	/*---------------------------------------*/
 
-	$('#tb-shortcode-generator .columns').each(function(){
-		$(this).find('.column-num option:first-child').remove();
-		$(this).find('.column-width-1').remove();
-	});
+	if ( typeof themeblvd_column_widths != 'undefined' ) {
+
+		// Theme Blvd framework v2.5+
+		$('#tb-shortcode-generator .column-width-input').on('themeblvd_update_columns', function(){
+			themeblvd_generator.preview_columns( $(this).closest('.shortcode-options') );
+		});
+
+	} else {
+
+		$('#tb-shortcode-generator').find('.column-num, .column-width select').on('change', function(){
+			themeblvd_generator.preview_columns( $(this).closest('.shortcode-options') );
+		});
+
+		$('#tb-shortcode-generator .columns').each(function(){
+			$(this).find('.column-num option:first-child').remove();
+			$(this).find('.column-width-1').remove();
+		});
+
+	}
+
+	$('#tb-shortcode-generator #wpautop').on('change', themeblvd_generator.columns_wpauto);
 
 	/*---------------------------------------*/
 	/* Send to editor
@@ -420,9 +604,9 @@ jQuery(document).ready(function($){
 
 	$('#tb-shortcode-to-editor').on( 'click', function(){
 
-		var modal = $(this).closest('#tb-shortcode-generator'),
+		var $modal = $(this).closest('#tb-shortcode-generator'),
 			type = $(this).data('insert'),
-			content = modal.find('.shortcode-preview-'+type).html(),
+			content = $modal.find('.shortcode-preview-'+type).html(),
 			text = true;
 
 		if ( $('#wp-content-wrap').hasClass('tmce-active') ) {
@@ -432,6 +616,14 @@ jQuery(document).ready(function($){
 		// Remove any HTML from shortcode content
 		content = content.replace(/<hr>/gi, '');
 
+		// HTML decode, if necessary
+		if ( type == 'icon_list' ) {
+			content = $("<div/>").html(content).text();
+			content = content.replace(/<ul>/gi, '\n<ul>\n');
+			content = content.replace(/<\/li>/gi, '<\/li>\n');
+			content = content.replace(/<\/ul>/gi, '<\/ul>\n');
+		}
+
 		// Remove line break HTML if going to raw Text editor
 		if ( text ) {
 			content = content.replace(/<br>/gi, '\n');
@@ -440,8 +632,11 @@ jQuery(document).ready(function($){
 		// Send shortcode to WP Editor
 		window.send_to_editor(content);
 
+		// Allow page to scroll again
+		$('body').removeClass('themeblvd-stop-scroll');
+
 		// Hide modal window
-		modal.hide();
+		$modal.hide();
 
 		return false;
 	});

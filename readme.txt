@@ -3,7 +3,7 @@ Author URI: http://www.jasonbobich.com
 Contributors: themeblvd
 Tags: shortcodes, bootstrap, Theme Blvd, themeblvd, Jason Bobich
 Tested up to: 3.9
-Stable Tag: 1.4.1
+Stable Tag: 1.5.0
 
 This plugin works in conjuction with the Theme Blvd framework to create shortcodes for many of the framework's internal elements.
 
@@ -92,6 +92,28 @@ Any content wrapped in the `[raw]` shortcode will allow you to escape any automa
 2. Shortcode Generator interface.
 
 == Changelog ==
+
+= 1.5.0 =
+
+* Added `[column]` shortcode; other column shortcodes are now deprecated.
+* Added `[lead]` shortcode.
+* Added `[pricing_table]` shortcode (requires Theme Blvd Framework 2.5+).
+* Added `[testimonial]` shortcode (requires Theme Blvd Framework 2.5+).
+* Added `[milestone]` and `[milestone_ring]` shortcode (requires Theme Blvd Framework 2.5+).
+* Added `[post_showcase]` shortcode (requires Theme Blvd Framework 2.5+).
+* Added `[blog]` shortcode; this is similar to previous `[post_list]`.
+* Added custom color selection for `[button]` shortcode (requires Theme Blvd Framework 2.5+).
+* Added custom text/background color selection for `[jumbotron]` shortcode (requires Theme Blvd Framework 2.5+).
+* Added titles and captions to `[gallery_slider]` (requires Theme Blvd Framework 2.5+).
+* Added filter option to post lists and post grids (requires Theme Blvd Framework 2.5+).
+* Added masonry option to post grids (requires Theme Blvd Framework 2.5+).
+* Added options to `[jumbotron]` shortcode (requires Theme Blvd Framework 2.5+).
+* Improvements to `[divider]` shortcode (requires Theme Blvd Framework 2.5+).
+* Improvements to `[progress_bar]` shortcode (requires Theme Blvd Framework 2.5+).
+* Adjustments to allow shortcodes to work with Ajax requests on the frontend of the site.
+* Better handling of default option values at *Settings > Writing > Theme Blvd Shortcodes*.
+* Fixed issues with inserting `[icon_list]` from shortcode generator.
+* Removed `[post_list_slider]` for newer themes, use `[post_slider]` or `[post_grid_slider]` instead.
 
 = 1.4.1 =
 
