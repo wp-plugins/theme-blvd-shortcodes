@@ -3,7 +3,7 @@ Author URI: http://www.jasonbobich.com
 Contributors: themeblvd
 Tags: shortcodes, bootstrap, Theme Blvd, themeblvd, Jason Bobich
 Tested up to: 3.9
-Stable Tag: 1.5.0
+Stable Tag: 1.5.1
 
 This plugin works in conjuction with the Theme Blvd framework to create shortcodes for many of the framework's internal elements.
 
@@ -92,6 +92,11 @@ Any content wrapped in the `[raw]` shortcode will allow you to escape any automa
 2. Shortcode Generator interface.
 
 == Changelog ==
+
+= 1.5.1 =
+
+* Fixed issues with "last" attribute not closing rows properly in 2.2-2.4 framework themes.
+* GlotPress compatibility (for 2015 wordpress.org release).
 
 = 1.5.0 =
 
