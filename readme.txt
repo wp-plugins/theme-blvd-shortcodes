@@ -3,7 +3,7 @@ Author URI: http://www.jasonbobich.com
 Contributors: themeblvd
 Tags: shortcodes, bootstrap, Theme Blvd, themeblvd, Jason Bobich
 Tested up to: 3.9
-Stable Tag: 1.5.4
+Stable Tag: 1.5.5
 
 This plugin works in conjuction with the Theme Blvd framework to create shortcodes for many of the framework's internal elements.
 
@@ -92,6 +92,10 @@ Any content wrapped in the `[raw]` shortcode will allow you to escape any automa
 2. Shortcode Generator interface.
 
 == Changelog ==
+
+= 1.5.5 =
+
+* Fixed: When publishing a new page with shortcode generator active, there was a side effect of `$post->post_excerpt` getting saved as `0`, from an unrelated option in the generator with id "excerpt".
 
 = 1.5.4 =
 
