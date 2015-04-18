@@ -1,5 +1,0 @@
-There’s something weird going on with committing to trunk. 
-
-Even though I’ve removed the directory “includes” from trunk, I can’t re-add it with any commit. I keep getting the error message that’s it’s under version control, when in fact, it shouldn’t exist.
-
-I’ll try to sort this out later, as matching trunk to the current version is really just a formality.
