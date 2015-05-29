@@ -1,9 +1,8 @@
 === Theme Blvd Shortcodes ===
-Author URI: http://www.jasonbobich.com
+Author URI: http://www.themeblvd.com
 Contributors: themeblvd
 Tags: shortcodes, bootstrap, Theme Blvd, themeblvd, Jason Bobich
-Tested up to: 3.9
-Stable Tag: 1.5.6
+Stable Tag: 1.5.7
 
 This plugin works in conjunction with the Theme Blvd framework to create shortcodes for many of the framework's internal elements.
 
@@ -92,6 +91,11 @@ Any content wrapped in the `[raw]` shortcode will allow you to escape any automa
 2. Shortcode Generator interface.
 
 == Changelog ==
+
+= 1.5.7 - 05/29/2015 =
+
+* Updated `[jumbotron]` to work with Theme Blvd framework 2.5 updates.
+* Added x-large, xx-large, and xxx-large sizes to generator for `[button]` shortcode (requires Theme Blvd Framework 2.5+).
 
 = 1.5.6 - 04/18/2015 =
 
